@@ -21,6 +21,7 @@ async function main() {
   ]);
 
   // const insertResult = await collection.insertOne({ name: 'Vlad', age: 28 });
+  // const insertResult = await collection.deleteMany();
 
   console.log('Inserted documents =>', insertResult);
 
