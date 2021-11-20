@@ -1,4 +1,7 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
+
+// const id = new ObjectId();
+// console.log(id);
 
 // Connection URL
 const url = 'mongodb://127.0.0.1:27017';
@@ -14,14 +17,23 @@ async function main() {
   const db = client.db(dbName);
   const collection = db.collection('users');
 
-  const insertResult = await collection.insertMany([
-    { description: 'task1', completed: true },
-    { description: 'task2', completed: false },
-    { description: 'task3', completed: true },
-  ]);
+  // const insertResult = await collection.insertMany([
+  //   {
+  //   { description: 'task1', completed: true },
+  //   { description: 'task2', completed: false },
+  //   { description: 'task3', completed: true },
+  // ]);
 
-  // const insertResult = await collection.insertOne({ name: 'Vlad', age: 28 });
-  // const insertResult = await collection.deleteMany();
+  // const insertResult = await collection.deleteMany({ name: { $ne: 'Vlad' } });
+
+  // const insertResult = await collection.findOne({
+  //   _id: new ObjectId('619795a90e1b8ad3a4a5342c'),
+  // });
+
+  const insertResult = await collection.findOneAndUpdate(
+    { name: 'Vlad' },
+    { $set: { name: 'Vladyslav' } }
+  );
 
   console.log('Inserted documents =>', insertResult);
 
