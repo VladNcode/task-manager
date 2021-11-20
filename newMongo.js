@@ -24,16 +24,22 @@ async function main() {
   //   { description: 'task3', completed: true },
   // ]);
 
-  // const insertResult = await collection.deleteMany({ name: { $ne: 'Vlad' } });
+  const insertResult = await collection.insertOne({ name: 'Vlad', age: 28 });
+  // const insertResult = await collection.deleteOne({ name: 'Vlad' });
 
   // const insertResult = await collection.findOne({
   //   _id: new ObjectId('619795a90e1b8ad3a4a5342c'),
   // });
 
-  const insertResult = await collection.findOneAndUpdate(
-    { name: 'Vlad' },
-    { $set: { name: 'Vladyslav' } }
-  );
+  // const insertResult = await collection.findOneAndUpdate(
+  //   { _id: new ObjectId('619790f461ba8705e3fac2c1') },
+  //   { $inc: { age: -1 } }
+  // );
+
+  // const insertResult = await collection.updateMany(
+  //   { description: { $exists: true } },
+  //   { $set: { completed: false } }
+  // );
 
   console.log('Inserted documents =>', insertResult);
 
