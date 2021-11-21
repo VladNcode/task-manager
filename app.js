@@ -9,8 +9,8 @@ const taskController = require('./controllers/taskController');
 base();
 
 const main = async () => {
-  // await userController.createUser('Dima', 'dfdfd');
-  await taskController.createTask('Get rid of the trash');
+  await userController.createUser('DimaAAAAA', 22, 'hii@lol.com', 'PaSsWoRD');
+  // await taskController.createTask('Get rid of the trash');
   // await kittenController.createKitten('Sunny');
   // const shikaka = await Kitten.findOne({ name: 'Sunny' });
   // shikaka.speak();
