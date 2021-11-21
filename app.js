@@ -1,22 +1,39 @@
-const base = require('./server');
-const Kitten = require('./model/kittenModel');
-const User = require('./model/userModel');
-const Task = require('./model/taskModel');
-const kittenController = require('./controllers/kittenController');
-const userController = require('./controllers/userController');
-const taskController = require('./controllers/taskController');
+const path = require('path');
+const express = require('express');
 
-base();
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 
-const main = async () => {
-  await userController.createUser('DimaAAAAA', 22, 'hii@lol.com', 'PaSsWoRD');
-  // await taskController.createTask('Get rid of the trash');
-  // await kittenController.createKitten('Sunny');
-  // const shikaka = await Kitten.findOne({ name: 'Sunny' });
-  // shikaka.speak();
-  // await kittenController.updateKitten('peter', 'Pryanik');
-  // const kittens = await Kitten.find();
-  // kittens.forEach(kitten => kitten.speak());
-};
+// const viewRouter = require('./routes/viewRoutes');
+const taskRouter = require('./routes/taskRoutes');
+// const userRouter = require('./routes/userRoutes');
 
-main().catch(e => console.log(e.message));
+const app = express();
+
+//* Setting pug as default view engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, '../views'));
+
+//* Serving static files
+app.use(express.static(path.join(__dirname, 'public'))); // 3000/public/overview.html === 3000/overview.html
+
+//* Body parser, reading from body into req.body
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+//* Routes
+// app.use('/', viewRouter);
+app.use('/api/v1/tasks', taskRouter);
+
+//* Error handling
+app.all('*', (req, res, next) => {
+  // const err = new Error(`Can't find ${req.originalUrl} on this server`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
+
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+});
+
+app.use(globalErrorHandler);
+
+module.exports = app;
