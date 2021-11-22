@@ -1,14 +1,20 @@
 const path = require('path');
 const express = require('express');
+const cors = require('cors');
+const passport = require('passport');
+const cookieSession = require('cookie-session');
+require('./passportSetup');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
 // const viewRouter = require('./routes/viewRoutes');
 const taskRouter = require('./routes/taskRoutes');
-// const userRouter = require('./routes/userRoutes');
+const userRouter = require('./routes/userRoutes');
 
 const app = express();
+
+app.use(cors());
 
 //* Setting pug as default view engine
 app.set('view engine', 'pug');
@@ -21,8 +27,21 @@ app.use(express.static(path.join(__dirname, 'public'))); // 3000/public/overview
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+//* Cookie session
+app.use(
+  cookieSession({
+    name: 'task-session',
+    keys: ['key1', 'key2'],
+  })
+);
+
+//* Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 //* Routes
 // app.use('/', viewRouter);
+app.use('/', userRouter);
 app.use('/api/v1/tasks', taskRouter);
 
 //* Error handling
