@@ -6,12 +6,12 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(authController.isLoggedIn, taskController.getAllTasks)
+  .get(authController.protect, taskController.getAllTasks)
   .post(taskController.createTask);
 
 router
   .route('/:id')
-  .get(taskController.getTask)
+  .get(authController.protect, taskController.getTask)
   .patch(taskController.updateTask)
   .delete(taskController.deleteTask);
 

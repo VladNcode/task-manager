@@ -19,10 +19,9 @@ router
   );
 
 router.route('/failed').get(authController.failedLogin);
-router
-  .route('/good')
-  .get(authController.isLoggedIn, authController.successLogin);
+router.route('/good').get(authController.protect, authController.successLogin);
 
 router.route('/logout').get(authController.userLogOut);
+router.route('/login').post(authController.login);
 
 module.exports = router;

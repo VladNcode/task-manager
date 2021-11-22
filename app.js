@@ -4,6 +4,7 @@ const cors = require('cors');
 const passport = require('passport');
 const cookieSession = require('cookie-session');
 require('./passportSetup');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // 3000/public/overview
 //* Body parser, reading from body into req.body
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
 
 //* Cookie session
 app.use(
