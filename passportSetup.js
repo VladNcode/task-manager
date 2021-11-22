@@ -23,7 +23,7 @@ passport.use(
       callbackURL: 'http://127.0.0.1:3000/auth/google/callback',
     },
     function (accessToken, refreshToken, profile, done) {
-      console.log(profile);
+      // console.log(profile); google profile
       User.findOrCreate(profile, function (err, user) {
         return done(err, user);
       });

@@ -1,12 +1,12 @@
 const express = require('express');
 const taskController = require('../controllers/taskController');
-const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
 router
   .route('/')
-  .get(userController.isLoggedIn, taskController.getAllTasks)
+  .get(authController.isLoggedIn, taskController.getAllTasks)
   .post(taskController.createTask);
 
 router

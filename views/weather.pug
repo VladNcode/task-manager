@@ -1,0 +1,9 @@
+extends base
+
+block content
+  main.main
+    img(src=`${icon}`)
+    p.weather--loc #{location}
+    p.weather--data #{data}
+    p.weather--time Local time: #{time}
+    

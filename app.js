@@ -8,7 +8,8 @@ require('./passportSetup');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
-// const viewRouter = require('./routes/viewRoutes');
+const viewRouter = require('./routes/viewRoutes');
+const authRouter = require('./routes/authRoutes');
 const taskRouter = require('./routes/taskRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -18,7 +19,7 @@ app.use(cors());
 
 //* Setting pug as default view engine
 app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, '../views'));
+app.set('views', path.join(__dirname, './views'));
 
 //* Serving static files
 app.use(express.static(path.join(__dirname, 'public'))); // 3000/public/overview.html === 3000/overview.html
@@ -40,8 +41,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //* Routes
-// app.use('/', viewRouter);
-app.use('/', userRouter);
+app.use('/', viewRouter);
+app.use('/auth/', authRouter);
+app.use('/user/', userRouter);
 app.use('/api/v1/tasks', taskRouter);
 
 //* Error handling
