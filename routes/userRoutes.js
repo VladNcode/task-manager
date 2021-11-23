@@ -4,8 +4,8 @@ const passport = require('passport');
 
 const router = express.Router();
 
-// router
-//   .route('/signup')
-//   .get(passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.route('/').post(userController.createUser);
+
+router.route('/:id').get(userController.getUser);
 
 module.exports = router;
