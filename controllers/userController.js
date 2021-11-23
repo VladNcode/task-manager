@@ -22,7 +22,18 @@ exports.createUser = catchAsync(async (req, res, next) => {
 exports.getUser = factory.getOne(User);
 exports.getAllUsers = factory.getAll(User);
 
-exports.updateUser = catchAsync(async function (req, res, next) {
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['name', 'age'];
+  const isValidOperation = updates.every(item => allowedUpdates.includes(item));
+  if (!isValidOperation)
+    return next(
+      new AppError(
+        `You can only update NAME and AGE by using this route! Please exclude everything else if you want to proceed`,
+        404
+      )
+    );
+
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,

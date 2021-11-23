@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb');
+// const { ObjectId } = require('mongodb');
 const validator = require('validator');
 
 // console.log(new ObjectId());
+// console.log(mongoose.Types.ObjectId());
 
 const userSchema = new mongoose.Schema({
   _id: {
     type: String,
-    default: new ObjectId(),
+    default: mongoose.Types.ObjectId(),
   },
   name: {
     type: String,
