@@ -82,7 +82,7 @@ exports.getAll = Model =>
       status: 'success',
       results: allDocs.length,
       data: {
-        tours: allDocs,
+        docs: allDocs,
       },
     });
   });

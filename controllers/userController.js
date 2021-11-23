@@ -11,7 +11,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
     password: req.body.password,
   });
 
-  res.status(200).json({
+  res.status(201).json({
     status: 'success',
     data: {
       user,
@@ -20,3 +20,22 @@ exports.createUser = catchAsync(async (req, res, next) => {
 });
 
 exports.getUser = factory.getOne(User);
+exports.getAllUsers = factory.getAll(User);
+
+exports.updateUser = catchAsync(async function (req, res, next) {
+  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!user) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: user,
+    },
+  });
+});
