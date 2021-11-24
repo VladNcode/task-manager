@@ -34,8 +34,7 @@ app.use(cookieParser());
 app.use(
   cookieSession({
     name: 'task-session',
-    //? FIX KEYS BELOW !!!!
-    keys: ['key1', 'key2'],
+    keys: [process.env.COOKIE_SECRET_KEY1, process.env.COOKIE_SECRET_KEY2],
   })
 );
 

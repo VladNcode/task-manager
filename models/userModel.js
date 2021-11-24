@@ -72,7 +72,7 @@ userSchema.statics.findOrCreate = function findOrCreate(profile, cb) {
       userObj._id = profile.id;
       userObj.name = profile.displayName;
       userObj.email = profile.emails[0].value;
-      userObj.password = 'defaultGooglePass';
+      userObj.password = process.env.GOOGLE_SECRET_DEFAULT_PASSWORD;
       //....
       userObj.save(cb);
     } else {
