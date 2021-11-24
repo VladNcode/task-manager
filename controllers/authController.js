@@ -68,11 +68,16 @@ exports.successLogin = (req, res) => {
   res.status(200).send(`Welcome mr ${req.user}!`);
 };
 
-exports.userLogOut = (req, res) => {
+exports.userLogOut = (req, res, next) => {
   req.session = null;
   req.logout();
   res.clearCookie('jwt');
-  res.redirect('/');
+  // res.redirect('/');
+
+  res.status(200).json({
+    status: 'success',
+    message: 'You have successfully logged out',
+  });
 };
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -107,6 +112,23 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   res.locals.user = currentUser;
   next();
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from Collection
+  const user = await User.findById(req.user.id).select('+password');
+
+  // 2) Check if posted password is correct
+  if (!user || !(await user.validatePassword(req.body.password, user.password))) {
+    return next(new AppError('Email or password is incorrect, please try again', 401));
+  }
+  // 3) If so, update the
+  user.password = req.body.newPassword;
+  // user.passwordConfirm = req.body.newPasswordConfirm;
+  await user.save();
+
+  // 4) Log the user in, send JWT
+  createSendToken(user, 200, req, res);
 });
 
 /* //?Only for rendered pages, no errors!
