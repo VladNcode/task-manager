@@ -2,7 +2,6 @@ const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
-const allowedUpdates = require('../utils/allowedUpdates');
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -24,7 +23,19 @@ exports.getUser = factory.getOne(User);
 exports.getAllUsers = factory.getAll(User);
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  allowedUpdates(req, res, next, 'name', 'age');
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['name', 'age'];
+  const isValidOperation = updates.every(item => allowedUpdates.includes(item));
+  if (!isValidOperation)
+    return next(
+      new AppError(
+        `You can only update: '${[...allowedUpdates]
+          .join(',')
+          .replace(/,/g, ', ')
+          .toUpperCase()}' fields by using this route! Please exclude everything else if you want to proceed`,
+        400
+      )
+    );
 
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
