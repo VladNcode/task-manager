@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 // const { ObjectId } = require('mongodb');
 const validator = require('validator');
+const bcrypt = require('bcrypt');
+
+const SALT_WORK_FACTOR = 12;
 
 // console.log(new ObjectId());
 // console.log(mongoose.Types.ObjectId());
@@ -49,6 +52,19 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// Password encryption
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);
+    this.password = await bcrypt.hash(this.password, salt);
+    // this.passwordConfirm = undefined;
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+});
+
 userSchema.statics.findOrCreate = function findOrCreate(profile, cb) {
   const userObj = new this();
   this.findOne({ _id: profile.id }, function (err, result) {
@@ -63,6 +79,11 @@ userSchema.statics.findOrCreate = function findOrCreate(profile, cb) {
       cb(err, result);
     }
   });
+};
+
+// Pass validation
+userSchema.methods.validatePassword = async function (candidatePassword, userPassword) {
+  return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 const User = mongoose.model('User', userSchema);

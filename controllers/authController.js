@@ -15,12 +15,19 @@ const createSendToken = (user, statusCode, req, res) => {
   // if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
   res.cookie('jwt', token, {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarderd-proto'] === 'https',
   });
+
+  // Remove the password from the output
+  user.password = undefined;
+  user.active = undefined;
+  user.role = undefined;
+  user.loginAttempts = undefined;
+  user.lockUntil = undefined;
+  user.passwordChangedAt = undefined;
+  user.__v = undefined;
 
   res.status(statusCode).json({
     status: 'success',
@@ -40,11 +47,16 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2) Find user
   const user = await User.findOne({ email }).select('+password');
-  if (!user)
-    return next(new AppError('Please enter correct email and password', 401));
+  if (!user) return next(new AppError('Please enter correct email and password', 401));
 
-  // 3) If everything is ok, send token to client and reset login attempts
+  // 3) Check if password is valid, if not inc log attempts
+  if (!(await user.validatePassword(password, user.password))) {
+    return next(new AppError('Please enter correct email and password', 401));
+  }
+
+  // 4) If everything is ok, send token to client and reset login attempts
   await User.findById(user.id);
+
   createSendToken(user, 200, req, res);
 });
 
@@ -71,19 +83,14 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // 1) Getting token and check of it's there
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
 
   if (!token) {
-    return next(
-      new AppError('You are not logged in! Please log in to get access.', 401)
-    );
+    return next(new AppError('You are not logged in! Please log in to get access.', 401));
   }
 
   // 2) Verification token
@@ -93,12 +100,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const currentUser = await User.findById(decoded.id);
 
   if (!currentUser) {
-    return next(
-      new AppError(
-        'The user belonging to this token does no longer exist.',
-        401
-      )
-    );
+    return next(new AppError('The user belonging to this token does no longer exist.', 401));
   }
 
   // GRANT ACCESS TO PROTECTED ROUTE

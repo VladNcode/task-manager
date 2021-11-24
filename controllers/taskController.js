@@ -25,6 +25,10 @@ exports.updateTask = catchAsync(async (req, res, next) => {
       )
     );
 
+  if (Object.keys(req.body).length === 0) {
+    next(new AppError('Provide some data to update.', 400));
+  }
+
   const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,

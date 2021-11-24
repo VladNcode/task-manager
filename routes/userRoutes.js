@@ -7,7 +7,7 @@ const router = express.Router();
 router.route('/').get(userController.getAllUsers).post(userController.createUser);
 
 // Protecting the routes
-router.use(authController.protect);
+// router.use(authController.protect);
 
 router
   .route('/:id')

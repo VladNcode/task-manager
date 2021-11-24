@@ -47,7 +47,7 @@ app.use(passport.session());
 app.use('/', viewRouter);
 app.use('/auth/', authRouter);
 app.use('/api/v1/users/', userRouter);
-app.use('/api/v1/tasks', taskRouter);
+app.use('/api/v1/tasks/', taskRouter);
 
 //* Error handling
 app.all('*', (req, res, next) => {
