@@ -4,14 +4,16 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-router.route('/').get(userController.getAllUsers).post(userController.createUser);
-
-// Protecting the routes
-// router.use(authController.protect);
+router.route('/').post(userController.createUser);
 
 router.route('/login').post(authController.login);
-router.route('/logout').get(authController.userLogOut);
+router.route('/logout').get(authController.protect, authController.userLogOut);
 router.route('/updatePassword').patch(authController.protect, authController.updatePassword);
+
+// Protecting the routes
+router.use(authController.protect);
+
+router.route('/').get(userController.getAllUsers);
 
 router
   .route('/:id')
