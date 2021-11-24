@@ -19,9 +19,6 @@ exports.createUser = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getUser = factory.getOne(User);
-exports.getAllUsers = factory.getAll(User);
-
 exports.updateUser = catchAsync(async (req, res, next) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['name', 'age'];
@@ -36,6 +33,10 @@ exports.updateUser = catchAsync(async (req, res, next) => {
         400
       )
     );
+
+  if (Object.keys(req.body).length === 0) {
+    next(new AppError('Provide some data to update.', 400));
+  }
 
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -53,3 +54,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getUser = factory.getOne(User);
+exports.deleteUser = factory.deleteOne(User);
+exports.getAllUsers = factory.getAll(User);

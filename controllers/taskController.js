@@ -2,7 +2,6 @@ const Task = require('../models/taskModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const AppError = require('../utils/appError');
-
 // const APIFeatures = require('../utils/apiFeatures');
 
 exports.getAllTasks = factory.getAll(Task);

@@ -1,17 +1,18 @@
 const express = require('express');
 const userController = require('../controllers/userController');
-const passport = require('passport');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-router
-  .route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+router.route('/').get(userController.getAllUsers).post(userController.createUser);
+
+// Protecting the routes
+router.use(authController.protect);
 
 router
   .route('/:id')
   .get(userController.getUser)
-  .patch(userController.updateUser);
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
 
 module.exports = router;
