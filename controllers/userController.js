@@ -11,7 +11,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
     password: req.body.password,
   });
 
-  const token = await user.generateAuthToken();
+  // const token = await user.generateAuthToken();
 
   res.status(201).json({
     status: 'success',

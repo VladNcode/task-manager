@@ -90,6 +90,22 @@ exports.userLogOut = (req, res, next) => {
   });
 };
 
+exports.protect2 = catchAsync(async (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+
+  const token = req.headers.authorization.split(' ')[1];
+  if (!token) return next(new AppError('You are not logged in! Please log in to get access.', 401));
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById({ _id: decoded.id, 'tokens.token': token });
+  if (!user) return next(new AppError('User not found!', 401));
+
+  req.user = user;
+  next();
+});
+
 exports.protect = catchAsync(async (req, res, next) => {
   // Checking if user is logged in via google
   if (req.isAuthenticated()) {
@@ -110,6 +126,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // 2) Verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  // console.log(decoded);
 
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);

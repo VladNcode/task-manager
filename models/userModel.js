@@ -74,7 +74,7 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 
-userSchema.statics.findOrCreate = async function findOrCreate2(profile) {
+userSchema.statics.findOrCreate = async function findOrCreate(profile) {
   try {
     let user = await User.findById(profile.id);
     if (!user) {

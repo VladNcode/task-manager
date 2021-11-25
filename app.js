@@ -30,6 +30,16 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
+//* Maintenance mode
+// app.use((req, res, next) => {
+//   res
+//     .status(503)
+//     .json({
+//       status: 'Maintenance',
+//       message: 'Site is currently under maintenance, we will be back in 2 hours!',
+//     });
+// });
+
 //* Cookie session
 app.use(
   cookieSession({
