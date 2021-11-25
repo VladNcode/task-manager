@@ -57,7 +57,16 @@ exports.login = catchAsync(async (req, res, next) => {
   // 4) If everything is ok, send token to client and reset login attempts
   await User.findById(user.id);
 
-  createSendToken(user, 200, req, res);
+  let token = await user.generateAuthToken();
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+      token,
+    },
+  });
+
+  // createSendToken(user, 200, req, res);
 });
 
 exports.failedLogin = (req, res) => {
@@ -65,6 +74,7 @@ exports.failedLogin = (req, res) => {
 };
 
 exports.successLogin = (req, res) => {
+  // console.log(req.user);
   res.status(200).send(`Welcome mr ${req.user}!`);
 };
 

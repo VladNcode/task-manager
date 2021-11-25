@@ -22,12 +22,11 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://127.0.0.1:3000/auth/google/callback',
     },
-    function (accessToken, refreshToken, profile, done) {
+    async function (accessToken, refreshToken, profile, done) {
       // console.log(accessToken);
       // console.log(profile); google profile
-      User.findOrCreate(profile, function (err, user) {
-        return done(err, user);
-      });
+      let user = await User.findOrCreate(profile);
+      return done(null, user);
     }
   )
 );

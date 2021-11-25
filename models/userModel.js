@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const catchAsync = require('../utils/catchAsync');
 
 const SALT_WORK_FACTOR = 12;
 
@@ -49,7 +51,46 @@ const userSchema = new mongoose.Schema({
     },
     select: false,
   },
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: [true, 'A user must have a token'],
+      },
+    },
+  ],
 });
+
+userSchema.methods.generateAuthToken = async function () {
+  const user = this;
+
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
+
+  return token;
+};
+
+userSchema.statics.findOrCreate = async function findOrCreate2(profile) {
+  try {
+    let user = await User.findById(profile.id);
+    if (!user) {
+      user = await User.create({
+        _id: profile.id,
+        name: profile.displayName,
+        email: profile.emails[0].value,
+        password: process.env.GOOGLE_SECRET_DEFAULT_PASSWORD,
+      });
+    }
+    await user.generateAuthToken();
+    return user;
+  } catch (err) {
+    return err;
+  }
+};
 
 // Password encryption
 userSchema.pre('save', async function (next) {
@@ -63,22 +104,6 @@ userSchema.pre('save', async function (next) {
     return next(err);
   }
 });
-
-userSchema.statics.findOrCreate = function findOrCreate(profile, cb) {
-  const userObj = new this();
-  this.findOne({ _id: profile.id }, function (err, result) {
-    if (!result) {
-      userObj._id = profile.id;
-      userObj.name = profile.displayName;
-      userObj.email = profile.emails[0].value;
-      userObj.password = process.env.GOOGLE_SECRET_DEFAULT_PASSWORD;
-      //....
-      userObj.save(cb);
-    } else {
-      cb(err, result);
-    }
-  });
-};
 
 // Pass validation
 userSchema.methods.validatePassword = async function (candidatePassword, userPassword) {
