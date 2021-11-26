@@ -51,28 +51,7 @@ const userSchema = new mongoose.Schema({
     },
     select: false,
   },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: [true, 'A user must have a token'],
-      },
-    },
-  ],
 });
-
-userSchema.methods.generateAuthToken = async function () {
-  const user = this;
-
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-
-  user.tokens = user.tokens.concat({ token });
-  await user.save();
-
-  return token;
-};
 
 userSchema.statics.findOrCreate = async function findOrCreate(profile) {
   try {
@@ -85,7 +64,7 @@ userSchema.statics.findOrCreate = async function findOrCreate(profile) {
         password: process.env.GOOGLE_SECRET_DEFAULT_PASSWORD,
       });
     }
-    await user.generateAuthToken();
+    user.save();
     return user;
   } catch (err) {
     return err;

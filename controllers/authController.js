@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 
+//! COOOKIE AND JWT
 const signToken = id =>
   jwt.sign({ id: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -11,8 +12,6 @@ const signToken = id =>
 
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
-
-  // if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
   res.cookie('jwt', token, {
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
@@ -38,6 +37,28 @@ const createSendToken = (user, statusCode, req, res) => {
   });
 };
 
+///////////////////////////////////////////////////////////
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from Collection
+  const user = await User.findById(req.user.id).select('+password');
+
+  // 2) Check if posted password is correct
+  if (!user || !(await user.validatePassword(req.body.password, user.password))) {
+    return next(new AppError('Email or password is incorrect, please try again', 401));
+  }
+  // 3) If so, update the
+  user.password = req.body.newPassword;
+  // user.passwordConfirm = req.body.newPasswordConfirm;
+  await user.save();
+
+  // 4) Log the user in, send JWT
+  createSendToken(user, 200, req, res);
+});
+
+///////////////////////////////////////////////////////////////
+
+//! LOGIN
 exports.login = catchAsync(async (req, res, next) => {
   // 1) Check if email and password exist
   const { email, password } = req.body;
@@ -57,28 +78,11 @@ exports.login = catchAsync(async (req, res, next) => {
   // 4) If everything is ok, send token to client and reset login attempts
   await User.findById(user.id);
 
-  let token = await user.generateAuthToken();
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-      token,
-    },
-  });
-
-  // createSendToken(user, 200, req, res);
+  createSendToken(user, 200, req, res);
 });
 
-exports.failedLogin = (req, res) => {
-  res.status(404).send('You failed to login');
-};
-
-exports.successLogin = (req, res) => {
-  // console.log(req.user);
-  res.status(200).send(`Welcome mr ${req.user}!`);
-};
-
-exports.userLogOut = (req, res, next) => {
+//! LOGOUT
+exports.userLogOut = catchAsync(async (req, res, next) => {
   req.session = null;
   req.logout();
   res.clearCookie('jwt');
@@ -88,24 +92,9 @@ exports.userLogOut = (req, res, next) => {
     status: 'success',
     message: 'You have successfully logged out',
   });
-};
-
-exports.protect2 = catchAsync(async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-
-  const token = req.headers.authorization.split(' ')[1];
-  if (!token) return next(new AppError('You are not logged in! Please log in to get access.', 401));
-
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const user = await User.findById({ _id: decoded.id, 'tokens.token': token });
-  if (!user) return next(new AppError('User not found!', 401));
-
-  req.user = user;
-  next();
 });
 
+//! PROTECT
 exports.protect = catchAsync(async (req, res, next) => {
   // Checking if user is logged in via google
   if (req.isAuthenticated()) {
@@ -141,42 +130,12 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.updatePassword = catchAsync(async (req, res, next) => {
-  // 1) Get user from Collection
-  const user = await User.findById(req.user.id).select('+password');
+//! PASSPORT STUFF
+exports.failedLogin = (req, res) => {
+  res.status(404).send('You failed to login');
+};
 
-  // 2) Check if posted password is correct
-  if (!user || !(await user.validatePassword(req.body.password, user.password))) {
-    return next(new AppError('Email or password is incorrect, please try again', 401));
-  }
-  // 3) If so, update the
-  user.password = req.body.newPassword;
-  // user.passwordConfirm = req.body.newPasswordConfirm;
-  await user.save();
-
-  // 4) Log the user in, send JWT
-  createSendToken(user, 200, req, res);
-});
-
-/* //?Only for rendered pages, no errors!
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
-  if (req.cookies.jwt) {
-    // 1) verify token
-    const decoded = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET
-    );
-
-    // 2) Check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
-      return next();
-    }
-
-    // THERE IS A LOGGED IN USER
-    res.locals.user = currentUser;
-    return next();
-  }
-  next();
-});
-*/
+exports.successLogin = (req, res) => {
+  // console.log(req.user);
+  res.status(200).send(`Welcome mr ${req.user}!`);
+};
