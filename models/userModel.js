@@ -51,6 +51,11 @@ const userSchema = new mongoose.Schema({
     },
     select: false,
   },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.statics.findOrCreate = async function findOrCreate(profile) {
@@ -82,6 +87,12 @@ userSchema.pre('save', async function (next) {
   } catch (err) {
     return next(err);
   }
+});
+
+userSchema.pre(/^find/, function (next) {
+  // this poinst to the current query
+  this.find({ active: { $ne: false } });
+  next();
 });
 
 // Pass validation

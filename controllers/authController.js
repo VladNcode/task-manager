@@ -39,6 +39,11 @@ const createSendToken = (user, statusCode, req, res) => {
 
 ///////////////////////////////////////////////////////////
 
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user._id, { active: false });
+  res.status(204).json({ status: 'success', data: null });
+});
+
 exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from Collection
   const user = await User.findById(req.user.id).select('+password');
