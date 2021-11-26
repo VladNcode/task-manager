@@ -10,6 +10,11 @@ const tasksSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: [true, 'Task must have an owner'],
+    ref: 'User',
+  },
 });
 
 const Task = mongoose.model('Task', tasksSchema);

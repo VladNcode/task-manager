@@ -10,10 +10,10 @@ const SALT_WORK_FACTOR = 12;
 // console.log(mongoose.Types.ObjectId());
 
 const userSchema = new mongoose.Schema({
-  _id: {
-    type: String,
-    default: mongoose.Types.ObjectId(),
-  },
+  // _id: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   default: mongoose.Types.ObjectId(),
+  // },
   name: {
     type: String,
     trim: true,
@@ -60,10 +60,9 @@ const userSchema = new mongoose.Schema({
 
 userSchema.statics.findOrCreate = async function findOrCreate(profile) {
   try {
-    let user = await User.findById(profile.id);
+    let user = await User.findOne({ email: profile.emails[0].value });
     if (!user) {
       user = await User.create({
-        _id: profile.id,
         name: profile.displayName,
         email: profile.emails[0].value,
         password: process.env.GOOGLE_SECRET_DEFAULT_PASSWORD,
@@ -75,6 +74,28 @@ userSchema.statics.findOrCreate = async function findOrCreate(profile) {
     return err;
   }
 };
+
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'owner',
+});
+
+userSchema.pre(/^find/, function (next) {
+  // this.populate({
+  //   path: 'tour',
+  //   select: 'name',
+  // }).populate({
+  //   path: 'user',
+  //   select: 'name photo',
+  // });
+
+  this.populate({
+    path: 'tasks',
+  });
+
+  next();
+});
 
 // Password encryption
 userSchema.pre('save', async function (next) {

@@ -4,14 +4,13 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-router
-  .route('/')
-  .get(authController.protect, taskController.getAllTasks)
-  .post(taskController.createTask);
+router.use(authController.protect);
+
+router.route('/').get(taskController.getAllTasks).post(taskController.createTask);
 
 router
   .route('/:id')
-  .get(authController.protect, taskController.getTask)
+  .get(taskController.getTask)
   .patch(taskController.updateTask)
   .delete(taskController.deleteTask);
 

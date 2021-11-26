@@ -33,6 +33,7 @@ const createSendToken = (user, statusCode, req, res) => {
     token,
     data: {
       user,
+      userTasks: user.tasks,
     },
   });
 };
@@ -44,6 +45,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       user: req.user,
+      userTasks: req.user.tasks,
     },
   });
 });
