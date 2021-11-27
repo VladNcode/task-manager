@@ -1,6 +1,7 @@
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const User = require('../models/userModel');
+const Task = require('../models/taskModel');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 
@@ -52,6 +53,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
 
 exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user._id, { active: false });
+  await Task.deleteMany({ owner: req.user._id });
   res.status(204).json({ status: 'success', data: null });
 });
 
