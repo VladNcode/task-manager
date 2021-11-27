@@ -1,21 +1,26 @@
 const mongoose = require('mongoose');
 
-const tasksSchema = new mongoose.Schema({
-  description: {
-    type: String,
-    trim: true,
-    required: [true, 'Task must have a description'],
+const tasksSchema = new mongoose.Schema(
+  {
+    description: {
+      type: String,
+      trim: true,
+      required: [true, 'Task must have a description'],
+    },
+    completed: {
+      type: Boolean,
+      default: false,
+    },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: [true, 'Task must have an owner'],
+      ref: 'User',
+    },
+    // createdAt: { type: Date, default: Date.now() },
+    // updatedAt: { type: Date, default: Date.now() },
   },
-  completed: {
-    type: Boolean,
-    default: false,
-  },
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: [true, 'Task must have an owner'],
-    ref: 'User',
-  },
-});
+  { timestamps: true }
+);
 
 const Task = mongoose.model('Task', tasksSchema);
 
