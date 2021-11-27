@@ -87,21 +87,21 @@ userSchema.virtual('tasks', {
   foreignField: 'owner',
 });
 
-userSchema.pre(/^find/, function (next) {
-  // this.populate({
-  //   path: 'tour',
-  //   select: 'name',
-  // }).populate({
-  //   path: 'user',
-  //   select: 'name photo',
-  // });
+// userSchema.pre(/^find/, function (next) {
+//   // this.populate({
+//   //   path: 'tour',
+//   //   select: 'name',
+//   // }).populate({
+//   //   path: 'user',
+//   //   select: 'name photo',
+//   // });
 
-  this.populate({
-    path: 'tasks',
-  });
+//   this.populate({
+//     path: 'tasks',
+//   });
 
-  next();
-});
+//   next();
+// });
 
 // Password encryption
 userSchema.pre('save', async function (next) {

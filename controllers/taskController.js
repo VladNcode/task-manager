@@ -4,11 +4,53 @@ const factory = require('./handlerFactory');
 const AppError = require('../utils/appError');
 // const APIFeatures = require('../utils/apiFeatures');
 
-exports.getAllTasks = factory.getAll(Task);
+// exports.getAllTasks = factory.getAll(Task);
 exports.getTask = factory.getOne(Task);
 // exports.createTask = factory.createOne(Task);
 // exports.updateTask = factory.updateOne(Task);
 // exports.deleteTask = factory.deleteOne(Task);
+
+exports.getAllTasks = catchAsync(async (req, res, next) => {
+  const match = {};
+
+  if (req.query.completed) {
+    // req.query.completed === 'true'
+    // if this is true match.completed = true(boolean) and vice versa
+    match.completed = req.query.completed === 'true';
+  }
+
+  const queryPage = +req.query.page || 1;
+  const limit = +req.query.limit || 100;
+  const skip = (queryPage - 1) * limit;
+
+  const sort = req.query.sort || '-createdAt';
+
+  let select = '-__v';
+  if (req.query.select) {
+    select = req.query.select.replace(/,/g, ' ');
+  }
+
+  await req.user.populate({
+    path: 'tasks',
+    match,
+    options: {
+      limit,
+      skip,
+      sort,
+    },
+    select,
+  });
+
+  const tasks = req.user.tasks;
+
+  res.status(200).json({
+    status: 'success',
+    results: tasks.length,
+    data: {
+      tasks,
+    },
+  });
+});
 
 exports.createTask = catchAsync(async (req, res, next) => {
   const task = await Task.create({
