@@ -22,7 +22,7 @@ router.route('/deleteMe').delete(authController.deleteMe);
 router
   .route('/:id')
   .get(userController.getUser)
-  .patch(userController.updateUser)
+  .patch(userController.uploadMult, userController.resizeUserPhoto, userController.updateUser)
   .delete(userController.deleteUser);
 
 module.exports = router;

@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       required: [true, 'A user must have a name!'],
     },
+    avatar: String,
     age: {
       type: Number,
       // required: [true, 'A user must have an age!'],
