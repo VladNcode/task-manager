@@ -1,7 +1,39 @@
+const multer = require('multer');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    return cb(null, true);
+  }
+
+  cb(new AppError('Not an image, please upload only images!', 400), false);
+};
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/img/avatars/');
+  },
+  filename: function (req, file, cb) {
+    console.log(file);
+    const uniqueSuffix = `${Date.now() + '-' + Math.round(Math.random() * 1e9)}.jpg`;
+    cb(null, file.fieldname + '-' + uniqueSuffix);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: multerFilter,
+  limits: { fileSize: 500000 },
+});
+
+exports.uploadMult = upload.single('avatar');
+
+exports.uploadAvatar = catchAsync(async (req, res, next) => {
+  res.send();
+});
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
