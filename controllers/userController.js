@@ -50,10 +50,6 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.uploadAvatar = catchAsync(async (req, res, next) => {
-  res.send();
-});
-
 /////////////////////////////////////////////////
 
 exports.createUser = catchAsync(async (req, res, next) => {

@@ -13,8 +13,6 @@ router.route('/updatePassword').patch(authController.protect, authController.upd
 // Protecting the routes
 router.use(authController.protect);
 
-router.route('/me/avatar').post(userController.uploadMult, userController.uploadAvatar);
-
 router.route('/').get(userController.getAllUsers);
 router.route('/me').get(authController.getMe);
 router.route('/deleteMe').delete(authController.deleteMe);
