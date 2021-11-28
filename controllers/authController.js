@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const Task = require('../models/taskModel');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+const { sendGoodbyeEmail } = require('../utils/email');
 
 //! COOOKIE AND JWT
 const signToken = id =>
@@ -52,8 +53,11 @@ exports.getMe = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMe = catchAsync(async (req, res, next) => {
+  sendGoodbyeEmail(req.user.email, req.user.name);
+
   await User.findByIdAndUpdate(req.user._id, { active: false });
   await Task.deleteMany({ owner: req.user._id });
+
   res.status(204).json({ status: 'success', data: null });
 });
 

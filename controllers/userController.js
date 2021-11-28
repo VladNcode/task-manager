@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
+const { sendWelcomeEmail } = require('../utils/email');
 
 /////////////////////////////////////////////////
 //! MULTER AVATAR UPLOAD
@@ -59,6 +60,8 @@ exports.createUser = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
   });
+
+  sendWelcomeEmail(req.body.email, req.body.name);
 
   res.status(201).json({
     status: 'success',

@@ -16,8 +16,6 @@ const tasksSchema = new mongoose.Schema(
       required: [true, 'Task must have an owner'],
       ref: 'User',
     },
-    // createdAt: { type: Date, default: Date.now() },
-    // updatedAt: { type: Date, default: Date.now() },
   },
   { timestamps: true }
 );
