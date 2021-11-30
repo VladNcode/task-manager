@@ -3,6 +3,8 @@ const request = require('supertest');
 const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
+const AppError = require('../utils/appError');
+const authController = require('../controllers/authController');
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
@@ -31,7 +33,6 @@ beforeEach(async () => {
     .post('/api/v1/users/login')
     .send({ email: 'pika@example.com', password: 'test1234' });
   token = res.body.token;
-  // console.log(res.body);
   id = res.body.data.user._id;
 });
 
@@ -42,6 +43,21 @@ afterEach(async () => {
 afterAll(async () => {
   await mongoose.connection.close();
 });
+
+// test('Should not be able to login with wrong credentials', async () => {
+//   await request('https://vlad-taskapp.herokuapp.com')
+//     .post('/api/v1/users/login/')
+//     .send({ email: 'test@example.com', password: 'test12345' })
+//     .expect(401);
+// }, 2000);
+
+// ? Not working in development
+// test('Should not be able to login with wrong credentials', async () => {
+//   request(app)
+//     .post('/api/v1/users/login/')
+//     .send({ email: 'test@example.com', password: 'test12345' })
+//     .expect(200);
+// });
 
 test('Should be able to signup a new user', async () => {
   await request(app).post('/api/v1/users/').send(userTwo).expect(201);

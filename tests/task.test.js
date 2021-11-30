@@ -23,14 +23,15 @@ beforeAll(async () => {
 
   await mongoose.connection.db.dropDatabase();
   await User.create(userOne);
-});
 
-beforeEach(async () => {
   const res = await request(app)
     .post('/api/v1/users/login')
     .send({ email: 'pika@example.com', password: 'test1234' });
-  token = res.body.token;
 
+  token = res.body.token;
+});
+
+beforeEach(async () => {
   const res2 = await request(app)
     .post('/api/v1/tasks/')
     .send({ description: 'BURGIR', completed: true })
