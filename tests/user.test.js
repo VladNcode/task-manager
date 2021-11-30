@@ -3,8 +3,6 @@ const request = require('supertest');
 const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
-const AppError = require('../utils/appError');
-const authController = require('../controllers/authController');
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
