@@ -12,7 +12,12 @@ jest.mock('../utils/email');
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 const userOne = { name: 'Pikachu', age: '25', email: 'pika@example.com', password: 'test1234' };
-const userTwo = { name: 'Bulbasaur', age: '25', email: 'bulba@example.com', password: 'test1234' };
+const userTwo = {
+  name: 'Bulbasaur',
+  age: '25',
+  email: 'vldsmrfow2@gmail.com',
+  password: 'test1234',
+};
 
 const url = '127.0.0.1:3000';
 let token;
@@ -55,9 +60,9 @@ test('Should not be able to login with wrong credentials', async () => {
     .expect(401);
 });
 
-test('Should be able to signup a new user', async () => {
+test.only('Should be able to signup a new user', async () => {
   const res = await request(app).post('/api/v1/users/').send(userTwo).expect(201);
-  const user = await User.findOne({ email: 'bulba@example.com' });
+  const user = await User.findOne({ email: 'vldsmrfow2@gmail.com' });
 
   // Checking if user is in DB
   expect(user).not.toBeNull();
@@ -69,7 +74,7 @@ test('Should be able to signup a new user', async () => {
   expect(res.body.data.user).toMatchObject({
     name: 'Bulbasaur',
     age: 25,
-    email: 'bulba@example.com',
+    email: 'vldsmrfow2@gmail.com',
   });
 });
 

@@ -3,7 +3,7 @@ require('dotenv').config({ path: './config.env' });
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-exports.sendWelcomeEmail = (email, name) => {
+sendWelcomeEmail = (email, name) => {
   sgMail
     .send({
       to: email, // Change to your recipient
@@ -17,7 +17,7 @@ exports.sendWelcomeEmail = (email, name) => {
     });
 };
 
-exports.sendGoodbyeEmail = (email, name) => {
+sendGoodbyeEmail = (email, name) => {
   sgMail
     .send({
       to: email, // Change to your recipient
@@ -31,4 +31,7 @@ exports.sendGoodbyeEmail = (email, name) => {
     });
 };
 
-// module.exports;
+module.exports = {
+  sendWelcomeEmail,
+  sendGoodbyeEmail,
+};
