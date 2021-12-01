@@ -7,6 +7,8 @@ const { expect } = require('@jest/globals');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 
+jest.mock('../utils/email');
+
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 const userOne = { name: 'Pikachu', age: '25', email: 'pika@example.com', password: 'test1234' };
@@ -139,7 +141,7 @@ test('Should be able to update password', async () => {
     .expect(200);
 });
 
-test.only('Should be able to delete me', async () => {
+test('Should be able to delete me', async () => {
   await request(app)
     .delete('/api/v1/users/deleteMe')
     .set('Authorization', 'Bearer ' + token)

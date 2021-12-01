@@ -53,7 +53,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMe = catchAsync(async (req, res, next) => {
-  // sendGoodbyeEmail(req.user.email, req.user.name);
+  sendGoodbyeEmail(req.user.email, req.user.name);
 
   await User.findByIdAndUpdate(req.user._id, { active: false });
   await Task.deleteMany({ owner: req.user._id });

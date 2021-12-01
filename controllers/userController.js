@@ -61,7 +61,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
     password: req.body.password,
   });
 
-  // sendWelcomeEmail(req.body.email, req.body.name);
+  sendWelcomeEmail(req.body.email, req.body.name);
 
   res.status(201).json({
     status: 'success',
