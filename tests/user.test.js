@@ -4,6 +4,8 @@ const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const { expect } = require('@jest/globals');
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
@@ -51,12 +53,15 @@ test('Should not be able to login with wrong credentials', async () => {
     .expect(401);
 });
 
-test.only('Should be able to signup a new user', async () => {
+test('Should be able to signup a new user', async () => {
   const res = await request(app).post('/api/v1/users/').send(userTwo).expect(201);
   const user = await User.findOne({ email: 'bulba@example.com' });
 
   // Checking if user is in DB
   expect(user).not.toBeNull();
+
+  // Checking if password is hashed
+  expect(user.password).not.toBe('test1234');
 
   // Checking if req contains correct info
   expect(res.body.data.user).toMatchObject({
@@ -66,11 +71,16 @@ test.only('Should be able to signup a new user', async () => {
   });
 });
 
-test('Should be able to login', async () => {
-  await request(app)
+test('Should be able to login and token must be correct', async () => {
+  const res = await request(app)
     .post('/api/v1/users/login')
     .send({ email: 'pika@example.com', password: 'test1234' })
     .expect(200);
+
+  let token2 = res.body.token;
+
+  const decoded = await promisify(jwt.verify)(token2, process.env.JWT_SECRET);
+  expect(decoded.id).toEqual(res.body.data.user._id);
 });
 
 test('Should be able to get /me page', async () => {
@@ -129,11 +139,15 @@ test('Should be able to update password', async () => {
     .expect(200);
 });
 
-test('Should be able to delete me', async () => {
+test.only('Should be able to delete me', async () => {
   await request(app)
     .delete('/api/v1/users/deleteMe')
     .set('Authorization', 'Bearer ' + token)
     .expect(204);
+
+  // Checking if user active is false
+  const user = await User.findById(id);
+  expect(user).toBeFalsy();
 });
 
 test('Should not be able to delete me while unauthenticated', async () => {
