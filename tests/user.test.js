@@ -12,14 +12,10 @@ jest.mock('../utils/email');
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 const userOne = { name: 'Pikachu', age: '25', email: 'pika@example.com', password: 'test1234' };
-const userTwo = {
-  name: 'Bulbasaur',
-  age: '25',
-  email: 'vldsmrfow2@gmail.com',
-  password: 'test1234',
-};
+const userTwo = { name: 'Bulbasaur', age: '25', email: 'bulba@example.com', password: 'test1234' };
 
 const url = '127.0.0.1:3000';
+let res;
 let token;
 let id;
 
@@ -50,6 +46,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
 });
 
@@ -60,9 +57,9 @@ test('Should not be able to login with wrong credentials', async () => {
     .expect(401);
 });
 
-test.only('Should be able to signup a new user', async () => {
+test('Should be able to signup a new user', async () => {
   const res = await request(app).post('/api/v1/users/').send(userTwo).expect(201);
-  const user = await User.findOne({ email: 'vldsmrfow2@gmail.com' });
+  const user = await User.findOne({ email: 'bulba@example.com' });
 
   // Checking if user is in DB
   expect(user).not.toBeNull();
@@ -74,7 +71,7 @@ test.only('Should be able to signup a new user', async () => {
   expect(res.body.data.user).toMatchObject({
     name: 'Bulbasaur',
     age: 25,
-    email: 'vldsmrfow2@gmail.com',
+    email: 'bulba@example.com',
   });
 });
 
@@ -121,6 +118,21 @@ test('Should be able to update user', async () => {
     .send({ name: 'Bulb' })
     .set('Authorization', 'Bearer ' + token)
     .expect(200);
+
+  const user = await User.findById(id);
+  expect(user.name).toBe('Bulb');
+});
+
+test('Should not be able to update user forbirden fields', async () => {
+  const res = await request(url)
+    .post('/api/v1/users/login')
+    .send({ email: 'test@example.com', password: 'test1234' });
+
+  await request(url)
+    .patch('/api/v1/users/' + res.body.data.user._id)
+    .send({ active: false })
+    .set('Authorization', 'Bearer ' + res.body.token)
+    .expect(400);
 });
 
 test('Should be able to upload avatar', async () => {
@@ -129,6 +141,9 @@ test('Should be able to upload avatar', async () => {
     .attach('avatar', 'public/img/avatars/user-61a1d72c77ea5407e1111a3b-1638008819594.jpeg')
     .set('Authorization', 'Bearer ' + token)
     .expect(200);
+
+  const user = await User.findById(id);
+  expect(user.avatar).toEqual(expect.any(String));
 });
 
 test('Should be able to logout', async () => {
