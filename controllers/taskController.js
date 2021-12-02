@@ -5,10 +5,25 @@ const AppError = require('../utils/appError');
 // const APIFeatures = require('../utils/apiFeatures');
 
 // exports.getAllTasks = factory.getAll(Task);
-exports.getTask = factory.getOne(Task);
+// exports.getTask = factory.getOne(Task);
 // exports.createTask = factory.createOne(Task);
 // exports.updateTask = factory.updateOne(Task);
 // exports.deleteTask = factory.deleteOne(Task);
+
+exports.getTask = catchAsync(async (req, res, next) => {
+  const task = await Task.findById(req.params.id);
+  if (!task) return next(new AppError('Task not found or does not belong to current user', 400));
+
+  if (task.owner.toString() !== req.user.id)
+    return next(new AppError('Task not found or does not belong to current user', 400));
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      task,
+    },
+  });
+});
 
 exports.getAllTasks = catchAsync(async (req, res, next) => {
   const match = {};
@@ -53,6 +68,8 @@ exports.getAllTasks = catchAsync(async (req, res, next) => {
 });
 
 exports.createTask = catchAsync(async (req, res, next) => {
+  if (!req.body.description) next(new AppError('Task must have a description', 400));
+
   const task = await Task.create({
     ...req.body,
     owner: req.user._id,

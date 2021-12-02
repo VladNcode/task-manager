@@ -55,7 +55,7 @@ beforeEach(async () => {
 
   const taskthree = await request(app)
     .post('/api/v1/tasks/')
-    .send({ description: 'BURGIR THREE', completed: true })
+    .send({ description: 'BURGIR THREE', completed: false })
     .set('Authorization', 'Bearer ' + tokenTaskUserTwo)
     .expect(201);
 
@@ -84,6 +84,14 @@ test('Should be able to create new task', async () => {
   expect(task.description).toEqual('BURGIR BURGIR');
 });
 
+test('Should not be able to create new task without description', async () => {
+  await request(app)
+    .post('/api/v1/tasks/')
+    .send({ completed: false })
+    .set('Authorization', 'Bearer ' + tokenTask)
+    .expect(400);
+});
+
 test('Should be able to get all (currently two created) userOne tasks', async () => {
   const res = await request(app)
     .get('/api/v1/tasks/')
@@ -110,6 +118,19 @@ test('Should be able to get task', async () => {
   expect(task.description).toEqual('BURGIR');
 });
 
+test('Should not be able to get other users tasks', async () => {
+  await request(app)
+    .get('/api/v1/tasks/' + taskId)
+    .set('Authorization', 'Bearer ' + tokenTaskUserTwo)
+    .expect(400);
+});
+
+test('Should not be able to get task if not authenticated', async () => {
+  await request(app)
+    .get('/api/v1/tasks/' + taskId)
+    .expect(401);
+});
+
 test('Should be able to update task', async () => {
   await request(app)
     .patch('/api/v1/tasks/' + taskId)
@@ -121,6 +142,17 @@ test('Should be able to update task', async () => {
   expect(task.completed).toEqual(false);
 });
 
+test('Should not be able to update other user task', async () => {
+  await request(app)
+    .patch('/api/v1/tasks/' + taskId)
+    .send({ completed: false })
+    .set('Authorization', 'Bearer ' + tokenTaskUserTwo)
+    .expect(401);
+
+  const task = await Task.findById(taskId);
+  expect(task.completed).toEqual(true);
+});
+
 test('Should be able to delete task', async () => {
   await request(app)
     .delete('/api/v1/tasks/' + taskId)
@@ -129,6 +161,15 @@ test('Should be able to delete task', async () => {
 
   const task = await Task.findById(taskId);
   expect(task).toBeFalsy();
+});
+
+test('Should not be able to delete task if not authenticated', async () => {
+  await request(app)
+    .delete('/api/v1/tasks/' + taskId)
+    .expect(401);
+
+  const task = await Task.findById(taskId);
+  expect(task.description).toEqual('BURGIR');
 });
 
 test('Should be able to visit main page', async () => {
@@ -143,4 +184,40 @@ test('Second user should not be able to delete a task created by first user', as
 
   const task = await Task.findById(taskId);
   expect(task.description).toEqual('BURGIR');
+});
+
+test('Should fetch only completed tasks', async () => {
+  const res = await request(app)
+    .get('/api/v1/tasks?completed=false')
+    .set('Authorization', 'Bearer ' + tokenTask)
+    .expect(200);
+
+  expect(res.body.data.tasks.length).toEqual(0);
+});
+
+test('Should fetch only incomplete tasks', async () => {
+  const res = await request(app)
+    .get('/api/v1/tasks?completed=true')
+    .set('Authorization', 'Bearer ' + tokenTask)
+    .expect(200);
+
+  expect(res.body.data.tasks.length).toEqual(2);
+});
+
+test('Should sort by createdAt', async () => {
+  const res = await request(app)
+    .get('/api/v1/tasks?sort=createdAt')
+    .set('Authorization', 'Bearer ' + tokenTask)
+    .expect(200);
+
+  expect(res.body.data.tasks[0].description).toEqual('BURGIR');
+});
+
+test('Should be able to select fields', async () => {
+  const res = await request(app)
+    .get('/api/v1/tasks?select=completed,description,-_id,-owner')
+    .set('Authorization', 'Bearer ' + tokenTask)
+    .expect(200);
+
+  expect(res.body.data.tasks[0]).toEqual({ description: 'BURGIR TWO', completed: true });
 });
