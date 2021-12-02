@@ -11,7 +11,10 @@ const port = process.env.PORT || 4000;
 let server;
 let token;
 let tokenTask;
+let tokenTaskUserTwo;
 let taskId;
+let taskTwoId;
+let taskThreeId;
 let id;
 
 const startServer = () => {
@@ -37,5 +40,8 @@ module.exports = {
   startServer,
   closeServer,
   tokenTask,
+  tokenTaskUserTwo,
   taskId,
+  taskTwoId,
+  taskThreeId,
 };
