@@ -3,36 +3,24 @@ const request = require('supertest');
 const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
-const { expect } = require('@jest/globals');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const { urlencoded } = require('express');
+let {
+  DB,
+  userOne,
+  userTwo,
+  url,
+  token,
+  id,
+  startServer,
+  closeServer,
+} = require('./fixtures/config');
 
 jest.mock('../utils/email');
 
-const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
-
-const userOne = { name: 'Pikachu', age: '25', email: 'pika@example.com', password: 'test1234' };
-const userTwo = { name: 'Bulbasaur', age: '25', email: 'bulba@example.com', password: 'test1234' };
-
-const url = '127.0.0.1:4000';
-const port = process.env.PORT || 4000;
-// const server = app.listen(port, (req, res) => {
-//   console.log(`Listening at port ${port}`);
-//   console.log(`Currently in: ${process.env.NODE_ENV}`);
-// });
-
-let server;
-let res;
-let token;
-let id;
-
-//* Connect to the database
+//* Connect to the server and  database
 beforeAll(async () => {
-  server = app.listen(port, (req, res) => {
-    console.log(`Listening at port ${port}`);
-    console.log(`Currently in: ${process.env.NODE_ENV}`);
-  });
+  startServer();
 
   process.env.NODE_ENV = 'development';
 
@@ -64,7 +52,7 @@ afterAll(async () => {
   await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
 
-  server.close();
+  closeServer();
 });
 
 test('Should not be able to login with wrong credentials', async () => {

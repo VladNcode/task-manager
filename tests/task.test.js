@@ -4,13 +4,7 @@ const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const Task = require('../models/taskModel');
-
-const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
-
-const userOne = { name: 'Pikachu', age: '25', email: 'pika@example.com', password: 'test1234' };
-
-let token;
-let taskId;
+let { DB, userOne, tokenTask, taskId } = require('./fixtures/config');
 
 //* Connect to the database
 beforeAll(async () => {
@@ -28,14 +22,14 @@ beforeAll(async () => {
     .post('/api/v1/users/login')
     .send({ email: 'pika@example.com', password: 'test1234' });
 
-  token = res.body.token;
+  tokenTask = res.body.token;
 });
 
 beforeEach(async () => {
   const res2 = await request(app)
     .post('/api/v1/tasks/')
     .send({ description: 'BURGIR', completed: true })
-    .set('Authorization', 'Bearer ' + token)
+    .set('Authorization', 'Bearer ' + tokenTask)
     .expect(201);
 
   taskId = res2.body.data.task._id;
@@ -53,7 +47,7 @@ afterAll(async () => {
 test('Should be able to get all user tasks', async () => {
   await request(app)
     .get('/api/v1/tasks/')
-    .set('Authorization', 'Bearer ' + token)
+    .set('Authorization', 'Bearer ' + tokenTask)
     .expect(200);
 });
 
@@ -61,14 +55,14 @@ test('Should be able to create new task', async () => {
   await request(app)
     .post('/api/v1/tasks/')
     .send({ description: 'BURGIR BURGIR', completed: true })
-    .set('Authorization', 'Bearer ' + token)
+    .set('Authorization', 'Bearer ' + tokenTask)
     .expect(201);
 });
 
 test('Should be able to get task', async () => {
   await request(app)
     .get('/api/v1/tasks/' + taskId)
-    .set('Authorization', 'Bearer ' + token)
+    .set('Authorization', 'Bearer ' + tokenTask)
     .expect(200);
 });
 
@@ -76,14 +70,14 @@ test('Should be able to update task', async () => {
   await request(app)
     .patch('/api/v1/tasks/' + taskId)
     .send({ completed: false })
-    .set('Authorization', 'Bearer ' + token)
+    .set('Authorization', 'Bearer ' + tokenTask)
     .expect(200);
 });
 
 test('Should be able to delete task', async () => {
   await request(app)
     .delete('/api/v1/tasks/' + taskId)
-    .set('Authorization', 'Bearer ' + token)
+    .set('Authorization', 'Bearer ' + tokenTask)
     .expect(200);
 });
 
