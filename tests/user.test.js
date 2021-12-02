@@ -6,6 +6,7 @@ const User = require('../models/userModel');
 const { expect } = require('@jest/globals');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+const { urlencoded } = require('express');
 
 jest.mock('../utils/email');
 
@@ -14,13 +15,27 @@ const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSW
 const userOne = { name: 'Pikachu', age: '25', email: 'pika@example.com', password: 'test1234' };
 const userTwo = { name: 'Bulbasaur', age: '25', email: 'bulba@example.com', password: 'test1234' };
 
-const url = '127.0.0.1:3000';
+const url = '127.0.0.1:4000';
+const port = process.env.PORT || 4000;
+// const server = app.listen(port, (req, res) => {
+//   console.log(`Listening at port ${port}`);
+//   console.log(`Currently in: ${process.env.NODE_ENV}`);
+// });
+
+let server;
 let res;
 let token;
 let id;
 
 //* Connect to the database
 beforeAll(async () => {
+  server = app.listen(port, (req, res) => {
+    console.log(`Listening at port ${port}`);
+    console.log(`Currently in: ${process.env.NODE_ENV}`);
+  });
+
+  process.env.NODE_ENV = 'development';
+
   await mongoose.connect(DB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -48,6 +63,8 @@ afterEach(async () => {
 afterAll(async () => {
   await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
+
+  server.close();
 });
 
 test('Should not be able to login with wrong credentials', async () => {
@@ -124,18 +141,20 @@ test('Should be able to update user', async () => {
 });
 
 test('Should not be able to update user forbirden fields', async () => {
-  const res = await request(url)
+  await request(url)
     .post('/api/v1/users/login')
-    .send({ email: 'test@example.com', password: 'test1234' });
+    .send({ email: 'pika@example.com', password: 'test1234' });
 
   await request(url)
-    .patch('/api/v1/users/' + res.body.data.user._id)
+    .patch('/api/v1/users/' + id)
     .send({ active: false })
-    .set('Authorization', 'Bearer ' + res.body.token)
+    .set('Authorization', 'Bearer ' + token)
     .expect(400);
 });
 
 test('Should be able to upload avatar', async () => {
+  process.env.NODE_ENV = 'test';
+
   await request(app)
     .patch('/api/v1/users/' + id)
     .attach('avatar', 'public/img/avatars/user-61a1d72c77ea5407e1111a3b-1638008819594.jpeg')
@@ -144,6 +163,8 @@ test('Should be able to upload avatar', async () => {
 
   const user = await User.findById(id);
   expect(user.avatar).toEqual(expect.any(String));
+
+  process.env.NODE_ENV = 'development';
 });
 
 test('Should be able to logout', async () => {
@@ -173,7 +194,7 @@ test('Should be able to delete me', async () => {
 });
 
 test('Should not be able to delete me while unauthenticated', async () => {
-  await request('127.0.0.1:3000').delete('/api/v1/users/deleteMe').expect(401);
+  await request(url).delete('/api/v1/users/deleteMe').expect(401);
 });
 
 test('Should be able to delete user', async () => {
@@ -184,7 +205,7 @@ test('Should be able to delete user', async () => {
 });
 
 test('Should not be able to delete user while unauthenticated', async () => {
-  await request('127.0.0.1:3000')
+  await request(url)
     .delete('/api/v1/users/' + id)
     .expect(401);
 });
