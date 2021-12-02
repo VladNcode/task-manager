@@ -4,6 +4,7 @@ const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const { promisify } = require('util');
+const { unlink } = require('fs');
 const jwt = require('jsonwebtoken');
 let { DB, userOne, userTwo, token, id } = require('./fixtures/config');
 
@@ -128,7 +129,7 @@ test('Should not be able to update user forbirden fields', async () => {
 test('Should be able to upload avatar', async () => {
   process.env.NODE_ENV = 'test';
 
-  await request(app)
+  const res = await request(app)
     .patch('/api/v1/users/' + id)
     .attach('avatar', 'public/img/avatars/user-61a1d72c77ea5407e1111a3b-1638008819594.jpeg')
     .set('Authorization', 'Bearer ' + token)
@@ -137,6 +138,10 @@ test('Should be able to upload avatar', async () => {
   const user = await User.findById(id);
   expect(user.avatar).toEqual(expect.any(String));
 
+  unlink(`${__dirname}/../public/img/avatars/${res.body.data.data.avatar}`, err => {
+    if (err) throw err;
+    console.log('File deleted');
+  });
   process.env.NODE_ENV = 'development';
 });
 
