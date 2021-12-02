@@ -5,31 +5,18 @@ const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-let {
-  DB,
-  userOne,
-  userTwo,
-  url,
-  token,
-  id,
-  startServer,
-  closeServer,
-} = require('./fixtures/config');
+let { DB, userOne, userTwo, token, id } = require('./fixtures/config');
 
 jest.mock('../utils/email');
 
 //* Connect to the server and  database
 beforeAll(async () => {
-  startServer();
-
   process.env.NODE_ENV = 'development';
 
   await mongoose.connect(DB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-
-  mongoose.connect(DB);
 
   await mongoose.connection.db.dropDatabase();
 });
@@ -51,12 +38,10 @@ afterEach(async () => {
 afterAll(async () => {
   await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
-
-  closeServer();
 });
 
 test('Should not be able to login with wrong credentials', async () => {
-  await request(url)
+  await request(app)
     .post('/api/v1/users/login/')
     .send({ email: 'test@example.com', password: 'test12345' })
     .expect(401);
@@ -100,7 +85,7 @@ test('Should be able to get /me page', async () => {
 });
 
 test('Should not be able to get /me page while unauthenticated', async () => {
-  await request(url).get('/api/v1/users/me').expect(401);
+  await request(app).get('/api/v1/users/me').expect(401);
 });
 
 test('Should be able to get all users', async () => {
@@ -129,11 +114,11 @@ test('Should be able to update user', async () => {
 });
 
 test('Should not be able to update user forbirden fields', async () => {
-  await request(url)
+  await request(app)
     .post('/api/v1/users/login')
     .send({ email: 'pika@example.com', password: 'test1234' });
 
-  await request(url)
+  await request(app)
     .patch('/api/v1/users/' + id)
     .send({ active: false })
     .set('Authorization', 'Bearer ' + token)
@@ -182,7 +167,7 @@ test('Should be able to delete me', async () => {
 });
 
 test('Should not be able to delete me while unauthenticated', async () => {
-  await request(url).delete('/api/v1/users/deleteMe').expect(401);
+  await request(app).delete('/api/v1/users/deleteMe').expect(401);
 });
 
 test('Should be able to delete user', async () => {
@@ -193,7 +178,7 @@ test('Should be able to delete user', async () => {
 });
 
 test('Should not be able to delete user while unauthenticated', async () => {
-  await request(url)
+  await request(app)
     .delete('/api/v1/users/' + id)
     .expect(401);
 });

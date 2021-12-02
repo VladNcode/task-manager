@@ -17,14 +17,14 @@ let {
 
 //* Connect to the database
 beforeAll(async () => {
+  process.env.NODE_ENV = 'development';
+
   await mongoose.connect(DB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-
-  mongoose.connect(DB);
-
   await mongoose.connection.db.dropDatabase();
+
   await User.create(userOne);
   await User.create(userTwo);
 
@@ -133,4 +133,14 @@ test('Should be able to delete task', async () => {
 
 test('Should be able to visit main page', async () => {
   await request(app).get('/').expect(200);
+});
+
+test('Second user should not be able to delete a task created by first user', async () => {
+  await request(app)
+    .delete('/api/v1/tasks/' + taskId)
+    .set('Authorization', 'Bearer ' + tokenTaskUserTwo)
+    .expect(500);
+
+  const task = await Task.findById(taskId);
+  expect(task.description).toEqual('BURGIR');
 });
