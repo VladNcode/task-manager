@@ -90,7 +90,7 @@ exports.updateTask = catchAsync(async (req, res, next) => {
   if (!task) return next(new AppError(`No task found with this id ${req.params.id}`, 404));
 
   if (task.owner.toString() !== req.user.id)
-    return next(new AppError(`This task doesn't belong to current user`));
+    return next(new AppError(`This task doesn't belong to current user`, 401));
 
   task = await Task.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -110,7 +110,7 @@ exports.deleteTask = catchAsync(async (req, res, next) => {
   if (!task) return next(new AppError(`No task found with this id ${req.params.id}`, 404));
 
   if (task.owner.toString() !== req.user.id)
-    return next(new AppError(`This task doesn't belong to current user`));
+    return next(new AppError(`This task doesn't belong to current user`, 401));
 
   task = await Task.findByIdAndDelete(req.params.id);
 

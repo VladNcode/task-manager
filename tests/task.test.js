@@ -139,7 +139,7 @@ test('Second user should not be able to delete a task created by first user', as
   await request(app)
     .delete('/api/v1/tasks/' + taskId)
     .set('Authorization', 'Bearer ' + tokenTaskUserTwo)
-    .expect(500);
+    .expect(401);
 
   const task = await Task.findById(taskId);
   expect(task.description).toEqual('BURGIR');
