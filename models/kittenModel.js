@@ -9,8 +9,7 @@ const kittySchema = new mongoose.Schema({
 });
 
 kittySchema.methods.speak = function speak() {
-  const greeting =
-    this.name === 'Shikaka' ? 'Dimka milashka <3' : 'Meow name is ' + this.name;
+  const greeting = this.name === 'Shikaka' ? 'Dimka milashka <3' : 'Meow name is ' + this.name;
   console.log(greeting);
 };
 

@@ -14,18 +14,8 @@ const multerFilter = (req, file, cb) => {
     return cb(null, true);
   }
 
-  cb(new AppError('Not an image, please upload only images!', 400), false);
+  cb(new AppError('Not an image, you can only upload images!', 400), false);
 };
-
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, 'public/img/avatars/');
-//   },
-//   filename: function (req, file, cb) {
-//     const uniqueSuffix = `${Date.now() + '-' + Math.round(Math.random() * 1e9)}.jpg`;
-//     cb(null, file.fieldname + '-' + uniqueSuffix);
-//   },
-// });
 
 const storage = multer.memoryStorage();
 
@@ -43,9 +33,9 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
   await sharp(req.file.buffer)
-    .resize(500, 500)
+    .resize(284, 284)
     .toFormat('jpeg')
-    .jpeg({ quality: 90 })
+    .jpeg({ quality: 70 })
     .toFile(`public/img/avatars/${req.file.filename}`);
 
   next();
