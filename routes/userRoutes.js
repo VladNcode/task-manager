@@ -13,14 +13,14 @@ router.route('/updatePassword').patch(authController.protect, authController.upd
 // Protecting the routes
 router.use(authController.protect);
 
-router.route('/').get(userController.getAllUsers);
+// router.route('/').get(userController.getAllUsers);
 router.route('/me').get(authController.getMe);
 router.route('/deleteMe').delete(authController.deleteMe);
 
 router
   .route('/:id')
-  .get(userController.getUser)
-  .patch(userController.uploadMult, userController.resizeUserPhoto, userController.updateUser)
-  .delete(userController.deleteUser);
+  .patch(userController.uploadMult, userController.resizeUserPhoto, userController.updateUser);
+// .get(userController.getUser)
+// .delete(userController.deleteUser);
 
 module.exports = router;

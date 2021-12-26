@@ -89,12 +89,12 @@ test('Should not be able to get /me page while unauthenticated', async () => {
   await request(app).get('/api/v1/users/me').expect(401);
 });
 
-test('Should be able to get all users', async () => {
-  await request(app)
-    .get('/api/v1/users/')
-    .set('Authorization', 'Bearer ' + token)
-    .expect(200);
-});
+// test('Should be able to get all users', async () => {
+//   await request(app)
+//     .get('/api/v1/users/')
+//     .set('Authorization', 'Bearer ' + token)
+//     .expect(200);
+// });
 
 test('Should be able to get one user', async () => {
   await request(app)
@@ -175,15 +175,15 @@ test('Should not be able to delete me while unauthenticated', async () => {
   await request(app).delete('/api/v1/users/deleteMe').expect(401);
 });
 
-test('Should be able to delete user', async () => {
-  await request(app)
-    .delete('/api/v1/users/' + id)
-    .set('Authorization', 'Bearer ' + token)
-    .expect(204);
-});
+// test('Should be able to delete user', async () => {
+//   await request(app)
+//     .delete('/api/v1/users/' + id)
+//     .set('Authorization', 'Bearer ' + token)
+//     .expect(204);
+// });
 
-test('Should not be able to delete user while unauthenticated', async () => {
-  await request(app)
-    .delete('/api/v1/users/' + id)
-    .expect(401);
-});
+// test('Should not be able to delete user while unauthenticated', async () => {
+//   await request(app)
+//     .delete('/api/v1/users/' + id)
+//     .expect(401);
+// });
